@@ -1,6 +1,5 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    x:ClassModifier="internal">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <SolidColorBrush x:Key="LightPrimaryBrush"
                      Color="{DynamicResource LightPrimaryColor}" />
     <LinearGradientBrush x:Key="PrimaryBrush"
@@ -108,8 +107,6 @@
     <SolidColorBrush x:Key="DarkAccentBrush"
                      Color="{DynamicResource DarkAccentColor}" />
 
-    <SolidColorBrush x:Key="HighlightBrush"
-                     Color="{DynamicResource HighlightColor}" />
     <SolidColorBrush x:Key="DarkMaskBrush"
                      Color="{DynamicResource DarkMaskColor}" />
     <SolidColorBrush x:Key="DarkOpacityBrush"

@@ -193,10 +193,6 @@ Step 4: Enjoy coding
 
 ## Latest examples
 
-### ConfettiCannon
-
-![ConfettiCannon](https://raw.githubusercontent.com/HandyOrg/HandyOrgResource/master/HandyControl/Resources/ConfettiCannon.gif)
-
 ### Watermark
 
 ![Watermark](https://raw.githubusercontent.com/HandyOrg/HandyOrgResource/master/HandyControl/Resources/Watermark.png)
@@ -213,11 +209,11 @@ Step 4: Enjoy coding
 
 ![UniformSpacingPanel](https://raw.githubusercontent.com/HandyOrg/HandyOrgResource/master/HandyControl/Resources/UniformSpacingPanel.png)
 
-## History publication
-
 ### FlexPanel
 
 ![FlexPanel](https://raw.githubusercontent.com/HandyOrg/HandyOrgResource/master/HandyControl/Resources/FlexPanel.gif)
+
+## History publication
 
 ### CheckComboBox
 

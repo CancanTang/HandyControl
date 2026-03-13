@@ -64,9 +64,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)UserControl\Controls\AutoCompleteTextBoxDemo.xaml.cs">
       <DependentUpon>AutoCompleteTextBoxDemo.xaml</DependentUpon>
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)UserControl\Controls\ConfettiCannonDemo.xaml.cs">
-      <DependentUpon>ConfettiCannonDemo.xaml</DependentUpon>
-    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)UserControl\Controls\ElementGroupDemo.xaml.cs">
       <DependentUpon>ElementGroupDemo.xaml</DependentUpon>
     </Compile>
@@ -286,13 +283,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)UserControl\Main\MainWindowContent.xaml.cs">
       <DependentUpon>MainWindowContent.xaml</DependentUpon>
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)UserControl\Main\NonClientAreaContent.xaml.cs">
+    <Compile Include="$(MSBuildThisFileDirectory)UserControl\Main\NonClientAreaContent.cs">
       <DependentUpon>NonClientAreaContent.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)UserControl\Main\ProjectsView.xaml.cs">
       <DependentUpon>ProjectsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)UserControl\Main\PracticalDemo.xaml.cs">
+    <Compile Include="$(MSBuildThisFileDirectory)UserControl\Main\PracticalDemo.cs">
       <DependentUpon>PracticalDemo.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)UserControl\Main\ContributorsView.xaml.cs">
@@ -554,7 +551,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="$(MSBuildThisFileDirectory)UserControl\Controls\ConfettiCannonDemo.xaml" />
     <Page Include="$(MSBuildThisFileDirectory)UserControl\Controls\ElementGroupDemo.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

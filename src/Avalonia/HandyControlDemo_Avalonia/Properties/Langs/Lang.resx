@@ -132,7 +132,7 @@
   <data name="Ask" xml:space="preserve">
     <value>询问</value>
   </data>
-  <data name="AutoCompleteBox" xml:space="preserve">
+  <data name="AutoCompleteTextBox" xml:space="preserve">
     <value>自动补全文本框</value>
   </data>
   <data name="Badge" xml:space="preserve">
@@ -459,7 +459,7 @@
   <data name="Misc" xml:space="preserve">
     <value>杂项</value>
   </data>
-  <data name="MorphingAnimation" xml:space="preserve">
+  <data name="Morphing Animation" xml:space="preserve">
     <value>变形动画</value>
   </data>
   <data name="Name" xml:space="preserve">
@@ -806,8 +806,5 @@
   </data>
   <data name="Window" xml:space="preserve">
     <value>窗口</value>
-  </data>
-  <data name="HyperlinkButton" xml:space="preserve">
-    <value>超链接按钮</value>
   </data>
 </root>

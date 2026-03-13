@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -34,6 +34,8 @@ public class NotifyIcon : FrameworkElement, IDisposable
 
     private IconHandle _iconHandle;
 
+    private const int WmTrayMouseMessage = InteropValues.WM_USER + 1024;
+
     private string _windowClassName;
 
     private int _wmTaskbarCreated;
@@ -56,16 +58,13 @@ public class NotifyIcon : FrameworkElement, IDisposable
 
     private static int NextId;
 
-    private static readonly ControlTokenManager<NotifyIcon> TokenManager = new();
+    private static readonly Dictionary<string, NotifyIcon> NotifyIconDic = new();
 
     static NotifyIcon()
     {
-        VisibilityProperty.OverrideMetadata(typeof(NotifyIcon),
-            new PropertyMetadata(ValueBoxes.VisibleBox, OnVisibilityChanged));
-        DataContextProperty.OverrideMetadata(typeof(NotifyIcon),
-            new FrameworkPropertyMetadata(DataContextPropertyChanged));
-        ContextMenuProperty.OverrideMetadata(typeof(NotifyIcon),
-            new FrameworkPropertyMetadata(ContextMenuPropertyChanged));
+        VisibilityProperty.OverrideMetadata(typeof(NotifyIcon), new PropertyMetadata(ValueBoxes.VisibleBox, OnVisibilityChanged));
+        DataContextProperty.OverrideMetadata(typeof(NotifyIcon), new FrameworkPropertyMetadata(DataContextPropertyChanged));
+        ContextMenuProperty.OverrideMetadata(typeof(NotifyIcon), new FrameworkPropertyMetadata(ContextMenuPropertyChanged));
     }
 
     private static void OnVisibilityChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -79,7 +78,6 @@ public class NotifyIcon : FrameworkElement, IDisposable
             {
                 ctl.OnIconChanged();
             }
-
             ctl.UpdateIcon(true);
         }
         else if (ctl._iconCurrentHandle != IntPtr.Zero)
@@ -134,9 +132,48 @@ public class NotifyIcon : FrameworkElement, IDisposable
         _dispatcherTimerPos.Tick += DispatcherTimerPos_Tick;
     }
 
+    public static void Register(string token, NotifyIcon notifyIcon)
+    {
+        if (string.IsNullOrEmpty(token) || notifyIcon == null) return;
+        NotifyIconDic[token] = notifyIcon;
+    }
+
+    public static void Unregister(string token, NotifyIcon notifyIcon)
+    {
+        if (string.IsNullOrEmpty(token) || notifyIcon == null) return;
+
+        if (NotifyIconDic.ContainsKey(token))
+        {
+            if (ReferenceEquals(NotifyIconDic[token], notifyIcon))
+            {
+                NotifyIconDic.Remove(token);
+            }
+        }
+    }
+
+    public static void Unregister(NotifyIcon notifyIcon)
+    {
+        if (notifyIcon == null) return;
+        var first = NotifyIconDic.FirstOrDefault(item => ReferenceEquals(notifyIcon, item.Value));
+        if (!string.IsNullOrEmpty(first.Key))
+        {
+            NotifyIconDic.Remove(first.Key);
+        }
+    }
+
+    public static void Unregister(string token)
+    {
+        if (string.IsNullOrEmpty(token)) return;
+
+        if (NotifyIconDic.ContainsKey(token))
+        {
+            NotifyIconDic.Remove(token);
+        }
+    }
+
     public static void ShowBalloonTip(string title, string content, NotifyIconInfoType infoType, string token)
     {
-        if (TokenManager.TryGetControl(token, out var notifyIcon))
+        if (NotifyIconDic.TryGetValue(token, out var notifyIcon))
         {
             notifyIcon.ShowBalloonTip(title, content, infoType);
         }
@@ -186,7 +223,22 @@ public class NotifyIcon : FrameworkElement, IDisposable
     }
 
     public static readonly DependencyProperty TokenProperty = DependencyProperty.Register(
-        nameof(Token), typeof(string), typeof(NotifyIcon), new PropertyMetadata(null, TokenManager.OnTokenChanged));
+        nameof(Token), typeof(string), typeof(NotifyIcon), new PropertyMetadata(default(string), OnTokenChanged));
+
+    private static void OnTokenChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        if (d is NotifyIcon notifyIcon)
+        {
+            if (e.NewValue == null)
+            {
+                Unregister(notifyIcon);
+            }
+            else
+            {
+                Register(e.NewValue.ToString(), notifyIcon);
+            }
+        }
+    }
 
     public string Token
     {
@@ -195,7 +247,7 @@ public class NotifyIcon : FrameworkElement, IDisposable
     }
 
     public static readonly DependencyProperty TextProperty = DependencyProperty.Register(
-        nameof(Text), typeof(string), typeof(NotifyIcon), new PropertyMetadata(null, OnTextChanged));
+        nameof(Text), typeof(string), typeof(NotifyIcon), new PropertyMetadata(default(string), OnTextChanged));
 
     private static void OnTextChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
@@ -216,7 +268,7 @@ public class NotifyIcon : FrameworkElement, IDisposable
     }
 
     public static readonly DependencyProperty IconProperty = DependencyProperty.Register(
-        nameof(Icon), typeof(ImageSource), typeof(NotifyIcon), new PropertyMetadata(null, OnIconChanged));
+        nameof(Icon), typeof(ImageSource), typeof(NotifyIcon), new PropertyMetadata(default(ImageSource), OnIconChanged));
 
     private static void OnIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
@@ -246,8 +298,7 @@ public class NotifyIcon : FrameworkElement, IDisposable
     }
 
     public static readonly DependencyProperty BlinkIntervalProperty = DependencyProperty.Register(
-        nameof(BlinkInterval), typeof(TimeSpan), typeof(NotifyIcon),
-        new PropertyMetadata(TimeSpan.FromMilliseconds(500), OnBlinkIntervalChanged));
+        nameof(BlinkInterval), typeof(TimeSpan), typeof(NotifyIcon), new PropertyMetadata(TimeSpan.FromMilliseconds(500), OnBlinkIntervalChanged));
 
     private static void OnBlinkIntervalChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
@@ -280,7 +331,6 @@ public class NotifyIcon : FrameworkElement, IDisposable
                 };
                 ctl._dispatcherTimerBlink.Tick += ctl.DispatcherTimerBlinkTick;
             }
-
             ctl._dispatcherTimerBlink.Start();
         }
         else
@@ -369,7 +419,6 @@ public class NotifyIcon : FrameworkElement, IDisposable
         {
             hWnd = InteropMethods.FindWindowEx(hWnd, IntPtr.Zero, "ToolbarWindow32", null);
         }
-
         return hWnd;
     }
 
@@ -383,7 +432,6 @@ public class NotifyIcon : FrameworkElement, IDisposable
             hTrayWnd = FindTrayToolbarOverFlowWindow();
             isTrue = FindNotifyIcon(hTrayWnd, ref rectNotifyList);
         }
-
         rectList = rectNotifyList;
         return isTrue;
     }
@@ -398,11 +446,8 @@ public class NotifyIcon : FrameworkElement, IDisposable
         if (count > 0)
         {
             InteropMethods.GetWindowThreadProcessId(hTrayWnd, out var trayPid);
-            var hProcess = InteropMethods.OpenProcess(
-                InteropValues.ProcessAccess.VMOperation | InteropValues.ProcessAccess.VMRead |
-                InteropValues.ProcessAccess.VMWrite, false, trayPid);
-            var address = InteropMethods.VirtualAllocEx(hProcess, IntPtr.Zero, 1024,
-                InteropValues.AllocationType.Commit, InteropValues.MemoryProtection.ReadWrite);
+            var hProcess = InteropMethods.OpenProcess(InteropValues.ProcessAccess.VMOperation | InteropValues.ProcessAccess.VMRead | InteropValues.ProcessAccess.VMWrite, false, trayPid);
+            var address = InteropMethods.VirtualAllocEx(hProcess, IntPtr.Zero, 1024, InteropValues.AllocationType.Commit, InteropValues.MemoryProtection.ReadWrite);
 
             var btnData = new InteropValues.TBBUTTON();
             var trayData = new InteropValues.TRAYDATA();
@@ -411,8 +456,7 @@ public class NotifyIcon : FrameworkElement, IDisposable
             for (uint i = 0; i < count; i++)
             {
                 InteropMethods.SendMessage(hTrayWnd, InteropValues.TB_GETBUTTON, i, address);
-                var isTrue =
-                    InteropMethods.ReadProcessMemory(hProcess, address, out btnData, Marshal.SizeOf(btnData), out _);
+                var isTrue = InteropMethods.ReadProcessMemory(hProcess, address, out btnData, Marshal.SizeOf(btnData), out _);
                 if (!isTrue) continue;
 
                 if (btnData.dwData == IntPtr.Zero)
@@ -420,21 +464,18 @@ public class NotifyIcon : FrameworkElement, IDisposable
                     btnData.dwData = btnData.iString;
                 }
 
-                InteropMethods.ReadProcessMemory(hProcess, btnData.dwData, out trayData, Marshal.SizeOf(trayData),
-                    out _);
+                InteropMethods.ReadProcessMemory(hProcess, btnData.dwData, out trayData, Marshal.SizeOf(trayData), out _);
                 InteropMethods.GetWindowThreadProcessId(trayData.hwnd, out var dwProcessId);
 
                 if (dwProcessId == (uint) handle)
                 {
                     var rect = new InteropValues.RECT();
-                    var lngRect = InteropMethods.VirtualAllocEx(hProcess, IntPtr.Zero, Marshal.SizeOf(typeof(Rect)),
-                        InteropValues.AllocationType.Commit, InteropValues.MemoryProtection.ReadWrite);
+                    var lngRect = InteropMethods.VirtualAllocEx(hProcess, IntPtr.Zero, Marshal.SizeOf(typeof(Rect)), InteropValues.AllocationType.Commit, InteropValues.MemoryProtection.ReadWrite);
 
                     InteropMethods.SendMessage(hTrayWnd, InteropValues.TB_GETITEMRECT, i, lngRect);
                     InteropMethods.ReadProcessMemory(hProcess, lngRect, out rect, Marshal.SizeOf(rect), out _);
 
-                    InteropMethods.VirtualFreeEx(hProcess, lngRect, Marshal.SizeOf(rect),
-                        InteropValues.FreeType.Decommit);
+                    InteropMethods.VirtualFreeEx(hProcess, lngRect, Marshal.SizeOf(rect), InteropValues.FreeType.Decommit);
                     InteropMethods.VirtualFreeEx(hProcess, lngRect, 0, InteropValues.FreeType.Release);
 
                     var left = rectTray.Left + rect.Left;
@@ -451,12 +492,10 @@ public class NotifyIcon : FrameworkElement, IDisposable
                     isFind = true;
                 }
             }
-
             InteropMethods.VirtualFreeEx(hProcess, address, 0x4096, InteropValues.FreeType.Decommit);
             InteropMethods.VirtualFreeEx(hProcess, address, 0, InteropValues.FreeType.Release);
             InteropMethods.CloseHandle(hProcess);
         }
-
         return isFind;
     }
 
@@ -476,7 +515,6 @@ public class NotifyIcon : FrameworkElement, IDisposable
                 IconHelper.GetDefaultIconHandles(out _, out _iconHandle);
                 _iconDefaultHandle = _iconHandle.CriticalGetHandle();
             }
-
             _iconCurrentHandle = _iconDefaultHandle;
         }
     }
@@ -490,7 +528,7 @@ public class NotifyIcon : FrameworkElement, IDisposable
             _isTransparent = isTransparent;
             var data = new InteropValues.NOTIFYICONDATA
             {
-                uCallbackMessage = InteropValues.WM_TRAYMOUSEMESSAGE,
+                uCallbackMessage = WmTrayMouseMessage,
                 uFlags = InteropValues.NIF_MESSAGE | InteropValues.NIF_ICON | InteropValues.NIF_TIP,
                 hWnd = _messageWindowHandle,
                 uID = _id,
@@ -573,9 +611,6 @@ public class NotifyIcon : FrameworkElement, IDisposable
                         _dispatcherTimerPos.Start();
                     }
                     break;
-                case InteropValues.NIN_BALLOONUSERCLICK:
-                    RaiseEvent(new RoutedEventArgs(BalloonTipClickEvent));
-                    break;
             }
         }
 
@@ -603,12 +638,12 @@ public class NotifyIcon : FrameworkElement, IDisposable
                 RoutedEvent = ClickEvent
             });
         }
-
         _doubleClick = false;
     }
 
     private void ShowContextMenu()
     {
+
         if (ContextContent != null)
         {
             _contextContent ??= new Popup
@@ -672,16 +707,6 @@ public class NotifyIcon : FrameworkElement, IDisposable
         remove => RemoveHandler(MouseDoubleClickEvent, value);
     }
 
-    public static readonly RoutedEvent BalloonTipClickEvent =
-        EventManager.RegisterRoutedEvent("BalloonTipClick", RoutingStrategy.Bubble, typeof(RoutedEventHandler),
-            typeof(NotifyIcon));
-
-    public event RoutedEventHandler BalloonTipClick
-    {
-        add => AddHandler(BalloonTipClickEvent, value);
-        remove => RemoveHandler(BalloonTipClickEvent, value);
-    }
-
     private void UpdateDataContext(FrameworkElement target, object oldValue, object newValue)
     {
         if (target == null || BindingOperations.GetBindingExpression(target, DataContextProperty) != null) return;
@@ -700,7 +725,6 @@ public class NotifyIcon : FrameworkElement, IDisposable
             {
                 _dispatcherTimerBlink.Stop();
             }
-
             UpdateIcon(false);
         }
 

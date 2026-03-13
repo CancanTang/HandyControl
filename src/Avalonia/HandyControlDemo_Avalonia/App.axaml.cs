@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
@@ -18,7 +17,7 @@ public class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         Properties.Langs.Lang.Culture = new CultureInfo("en");
-        RemoveDefaultDataValidator();
+        BindingPlugins.DataValidators.RemoveAt(0);
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -26,18 +25,5 @@ public class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
-    }
-
-    private static void RemoveDefaultDataValidator()
-    {
-        // Get an array of plugins to remove
-        var dataValidationPluginsToRemove =
-            BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
-
-        // remove each entry found
-        foreach (var plugin in dataValidationPluginsToRemove)
-        {
-            BindingPlugins.DataValidators.Remove(plugin);
-        }
     }
 }

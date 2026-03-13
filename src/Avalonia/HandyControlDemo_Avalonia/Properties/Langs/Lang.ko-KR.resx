@@ -399,8 +399,8 @@
   <data name="MessageBox" xml:space="preserve">
     <value>MessageBox</value>
   </data>
-  <data name="MorphingAnimation" xml:space="preserve">
-    <value>MorphingAnimation</value>
+  <data name="Morphing Animation" xml:space="preserve">
+    <value>Morphing Animation</value>
   </data>
   <data name="Name" xml:space="preserve">
     <value>Name</value>
@@ -798,16 +798,13 @@
   <data name="ElementGroup" xml:space="preserve">
     <value>ElementGroup</value>
   </data>
-  <data name="AutoCompleteBox" xml:space="preserve">
-    <value>AutoCompleteBox</value>
+  <data name="AutoCompleteTextBox" xml:space="preserve">
+    <value>AutoCompleteTextBox</value>
   </data>
   <data name="Watermark" xml:space="preserve">
     <value>Watermark</value>
   </data>
   <data name="CloseMainWindowDialog" xml:space="preserve">
     <value>Close main window dialog</value>
-  </data>
-  <data name="HyperlinkButton" xml:space="preserve">
-    <value>HyperlinkButton</value>
   </data>
 </root>

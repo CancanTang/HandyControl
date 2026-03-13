@@ -40,10 +40,6 @@ internal class VersionHelper
         var netVersion = ".NET 7.0";
 #elif NET8_0
         var netVersion = ".NET 8.0";
-#elif NET9_0
-        var netVersion = ".NET 9.0";
-#elif NET10_0
-        var netVersion = ".NET 10.0";
 #elif NETCOREAPP3_0
         var netVersion = ".NET CORE 3.0";
 #elif NETCOREAPP3_1

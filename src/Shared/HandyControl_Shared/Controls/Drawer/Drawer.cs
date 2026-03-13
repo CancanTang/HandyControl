@@ -17,14 +17,23 @@ namespace HandyControl.Controls;
 public class Drawer : FrameworkElement
 {
     private Storyboard _storyboard;
+
     private AdornerContainer _container;
+
     private ContentControl _animationControl;
+
     private TranslateTransform _translateTransform;
+
     private double _animationLength;
+
     private string _animationPropertyName;
+
     private FrameworkElement _maskElement;
+
     private AdornerLayer _layer;
+
     private UIElement _contentElement;
+
     private Point _contentRenderTransformOrigin;
 
     static Drawer()
@@ -50,8 +59,7 @@ public class Drawer : FrameworkElement
     private static void DataContextPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) =>
         ((Drawer) d).OnDataContextPropertyChanged(e);
 
-    private void OnDataContextPropertyChanged(DependencyPropertyChangedEventArgs e) =>
-        UpdateDataContext(_animationControl, e.OldValue, e.NewValue);
+    private void OnDataContextPropertyChanged(DependencyPropertyChangedEventArgs e) => UpdateDataContext(_animationControl, e.OldValue, e.NewValue);
 
     public static readonly RoutedEvent OpenedEvent =
         EventManager.RegisterRoutedEvent("Opened", RoutingStrategy.Bubble,
@@ -74,9 +82,7 @@ public class Drawer : FrameworkElement
     }
 
     public static readonly DependencyProperty IsOpenProperty = DependencyProperty.Register(
-        nameof(IsOpen), typeof(bool), typeof(Drawer),
-        new FrameworkPropertyMetadata(ValueBoxes.FalseBox, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
-            OnIsOpenChanged));
+        nameof(IsOpen), typeof(bool), typeof(Drawer), new FrameworkPropertyMetadata(ValueBoxes.FalseBox, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnIsOpenChanged));
 
     private static void OnIsOpenChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
@@ -212,8 +218,7 @@ public class Drawer : FrameworkElement
 
         _animationControl.DataContext = DataContext;
         _animationControl.CommandBindings.Clear();
-        _animationControl.CommandBindings.Add(new CommandBinding(ControlCommands.Close,
-            (s, e) => SetCurrentValue(IsOpenProperty, ValueBoxes.FalseBox)));
+        _animationControl.CommandBindings.Add(new CommandBinding(ControlCommands.Close, (s, e) => SetCurrentValue(IsOpenProperty, ValueBoxes.FalseBox)));
         panel.Children.Add(_animationControl);
         _container = new AdornerContainer(_layer)
         {
@@ -243,20 +248,31 @@ public class Drawer : FrameworkElement
             return;
         }
 
-        AdornerDecorator decorator = VisualHelper.GetParent<DrawerContainer>(this);
-        decorator ??= VisualHelper.GetChild<AdornerDecorator>(System.Windows.Window.GetWindow(this));
-        if (decorator == null)
+        AdornerDecorator decorator;
+        var parent = VisualHelper.GetParent<DrawerContainer>(this);
+        if (parent != null)
         {
-            return;
+            _contentElement = parent.Child;
+            decorator = parent;
+        }
+        else
+        {
+            var window = WindowHelper.GetActiveWindow();
+            if (window == null)
+            {
+                return;
+            }
+
+            decorator = VisualHelper.GetChild<AdornerDecorator>(window);
+            _contentElement = window.Content as UIElement;
         }
 
-        _contentElement = decorator.Child;
         if (_contentElement == null)
         {
             return;
         }
 
-        _layer = decorator.AdornerLayer;
+        _layer = decorator?.AdornerLayer;
         if (_layer == null)
         {
             return;
@@ -312,7 +328,6 @@ public class Drawer : FrameworkElement
             Storyboard.SetTargetProperty(drawerAnimation, new PropertyPath(_animationPropertyName));
             _storyboard.Children.Add(drawerAnimation);
         }
-
         _storyboard.Begin();
     }
 
@@ -365,8 +380,7 @@ public class Drawer : FrameworkElement
             ? AnimationHelper.CreateAnimation(.9)
             : AnimationHelper.CreateAnimation(1);
         Storyboard.SetTarget(animationX, _contentElement);
-        Storyboard.SetTargetProperty(animationX,
-            new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleX)"));
+        Storyboard.SetTargetProperty(animationX, new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleX)"));
 
         _storyboard.Children.Add(animationX);
 
@@ -374,8 +388,7 @@ public class Drawer : FrameworkElement
             ? AnimationHelper.CreateAnimation(.9)
             : AnimationHelper.CreateAnimation(1);
         Storyboard.SetTarget(animationY, _contentElement);
-        Storyboard.SetTargetProperty(animationY,
-            new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleY)"));
+        Storyboard.SetTargetProperty(animationY, new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleY)"));
 
         _storyboard.Children.Add(animationY);
     }
